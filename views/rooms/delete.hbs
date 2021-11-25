@@ -1,0 +1,12 @@
+{{#extends 'base'}}
+{{#block 'content'}}
+<h1>Delete Room with Room Number: {{room.room_number}} </h1>
+<form method='POST' class='m-3' >
+    <div>
+        <p>Are you sure you want to delete {{room.room_number}}? </p>
+        <input type='submit' class='btn btn-danger' value='Yes' />
+        <a href='/rooms' class='btn btn-success'>No</a>
+    </div>
+</form>
+{{/block}}
+{{/extends}}

@@ -1,0 +1,33 @@
+{{#extends 'base'}}
+{{#block 'content'}}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Room Number</th>
+            <th>Room Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each rooms}}
+        <tr>
+            <td>
+                {{this.id}}
+            </td>
+            <td>
+                {{this.room_number}}
+            </td>
+            <td>
+                {{this.room_price}}
+            </td>
+            <td>
+                <a href='/rooms/{{this.id}}/update' class='btn btn-primary btn-sm py-0' >Update</a>
+                <a href='/rooms/{{this.id}}/delete' class='btn btn-primary btn-sm py-0' >Delete</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+{{/block}}
+{{/extends}}

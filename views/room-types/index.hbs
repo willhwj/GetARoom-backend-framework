@@ -1,0 +1,49 @@
+{{#extends 'base'}}
+{{#block 'content'}}
+<table class='table m-3'>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Inventory</th>
+            <th>Room Size in Square Meters</th>
+            <th>Base Hourly Cost</th>
+            <th>Max Occupancy Allowed</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each room_types}}
+        <tr>
+            <td>
+                {{this.id}}
+            </td>
+            <td>
+                {{this.name}}
+            </td>
+            <td>
+                {{this.description}}
+            </td>
+            <td>
+                {{this.inventory}}
+            </td>
+            <td>
+                {{this.room_size}}
+            </td>
+            <td>
+                {{this.base_hourly_cost}}
+            </td>
+            <td>
+                {{this.max_occupancy}}
+            </td>
+            <td>
+                <a href='/room-types/{{this.id}}/update' class='btn btn-primary btn-sm py-0' >Update</a>
+                <a href='/room-types/{{this.id}}/delete' class='btn btn-danger btn-sm py-0' >Delete</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+{{/block}}
+{{/extends}}
