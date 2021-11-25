@@ -1,5 +1,6 @@
 {{#extends 'base'}}
 {{#block 'content'}}
+<a href="/rooms/create" class='btn btn-primary sm m-3 py-0'>Create New Room</a>
 <table>
     <thead>
         <tr>
@@ -23,7 +24,7 @@
             </td>
             <td>
                 <a href='/rooms/{{this.id}}/update' class='btn btn-primary btn-sm py-0' >Update</a>
-                <a href='/rooms/{{this.id}}/delete' class='btn btn-primary btn-sm py-0' >Delete</a>
+                <a href='/rooms/{{this.id}}/delete' class='btn btn-danger btn-sm py-0' >Delete</a>
             </td>
         </tr>
         {{/each}}
