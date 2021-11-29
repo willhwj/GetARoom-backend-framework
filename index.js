@@ -26,12 +26,14 @@ app.use(express.urlencoded({
 const landingRoutes = require('./routes/landing');
 const roomTypeRoutes = require('./routes/room-types');
 const roomRoutes = require('./routes/rooms');
+const roomSlotRoutes = require('./routes/room-slots');
 
 async function main(){
 
     app.use('/', landingRoutes);
     app.use('/room-types', roomTypeRoutes);
     app.use('/rooms', roomRoutes);
+    app.use('/room-slots', roomSlotRoutes);
 }
 
 main();

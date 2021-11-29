@@ -2,26 +2,26 @@
 const forms = require('forms');
 // create some shortcuts
 const fields = forms.fields;
-const validators = forms.validators;
 const widgets = forms.widgets;
+const validators = forms.validators;
 
-var bootstrapField = function (name, object){
-    if(!Array.isArray(object.widget.classes)) {
-        object.widget.classes =[];
+var bootstrapField = function (name, object) {
+    if (!Array.isArray(object.widget.classes)) {
+        object.widget.classes = [];
     }
 
-    if (object.widget.classes.indexOf('form-control')=== -1){
+    if (object.widget.classes.indexOf('form-control') === -1 && object.widget.classes.indexOf('form-check') === -1) {
         object.widget.classes.push('form-control');
     }
 
     var validationclass = object.value && !object.error ? 'is-valid' : '';
-    validationclass = object.error ? 'is-invalid': validationclass;
+    validationclass = object.error ? 'is-invalid' : validationclass;
     if (validationclass) {
         object.widget.classes.push(validationclass);
     }
 
     var label = object.labelHTML(name);
-    var error = object.error ? '<div class="invalid-feedback">' + object.error + '</div>': '';
+    var error = object.error ? '<div class="invalid-feedback">' + object.error + '</div>' : '';
 
     var widget = object.widget.toHTML(name, object);
     return '<div class="form-group ' + validationclass + '">' + label + widget + error + '</div>';
@@ -80,7 +80,7 @@ const createRoomTypeForm = () => {
             required: true,
             errorAfterField: true,
             cssClasses: {
-                label:['form-label']
+                label: ['form-label']
             },
             'validators': [validators.integer()]
         }),
@@ -88,7 +88,7 @@ const createRoomTypeForm = () => {
             required: true,
             errorAfterField: true,
             cssClasses: {
-                label:['form-label']
+                label: ['form-label']
             },
             'validators': [validators.integer()]
         }),
@@ -111,4 +111,88 @@ const createRoomTypeForm = () => {
     })
 };
 
-module.exports ={createRoomForm, createRoomTypeForm, bootstrapField};
+const createRoomSlotForm = (rooms) => {
+    return forms.create({
+        'available': fields.boolean({
+            label: 'Available For Booking?',
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.checkbox({
+                classes: ['form-check']
+            })
+        }),
+        'day_of_week': fields.string({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.select(),
+            choices: {
+                mon: 'Monday',
+                tue: 'Tuesday',
+                wed: 'Wednesday'
+            }
+        }),
+        'start_date': fields.date({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.date(),
+            validators: [validators.required()]
+        }),
+        'end_date': fields.date({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.date(),
+            validators: [
+                validators.required(),
+                function (form, field, callback) {
+                    if (field.data < form.fields['start_date'].data) {
+                        callback('end date must be the same as or further into the future than start date')
+                    } else {
+                        callback()
+                    }
+                }]
+        }),
+        'slots': fields.array({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.multipleSelect(),
+            choices: {
+                'Morning': {
+                    '08:00:00': '8:00am', '09:00:00': '9:00am', '10:00:00': '10:00am', '11:00:00': '11:00am', '12:00:00': '12:00pm'
+                },
+                'Afternoon': {
+                    '13:00:00': '1:00pm', '14:00:00': '2:00pm', '15:00:00': '3:00pm', '16:00:00': '4:00pm', '17:00:00': '5:00pm'
+                },
+                'Evening': {
+                    '18:00:00': '6:00pm', '19:00:00': '7:00pm', '20:00:00': '8:00pm', '21:00:00': '9:00pm', '22:00:00': '10:00pm', '23:00:00': '11:00pm'
+                }
+            },
+            validators: [validators.required('Please select at least 1 slot to proceed')]
+        }),
+        'room_id': fields.array({
+            label: 'Room number',
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.multipleSelect(),
+            choices: rooms
+        })
+    })
+}
+
+module.exports = { createRoomForm, createRoomTypeForm, createRoomSlotForm, bootstrapField };

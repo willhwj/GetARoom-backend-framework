@@ -16,9 +16,6 @@ router.get('/create', async(req, res)=> {
     const allRoomTypes = await Room_type.fetchAll().map(roomType => {
         return [roomType.get('id'), roomType.get('name')];
     });
-
-    console.log(allRoomTypes);
-
     const roomForm = createRoomForm(allRoomTypes);
     res.render('rooms/create', {
         'form': roomForm.toHTML(bootstrapField)
