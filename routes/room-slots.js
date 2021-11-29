@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { bootstrapField, createRoomSlotForm } = require('../forms');
+const { bootstrapField, createRoomSlotForm, updateRoomSlotForm } = require('../forms');
 const { Room_slot, Room, Room_type } = require('../models');
 
 // display room slots
 router.get('/', async (req, res) => {
-    let roomSlots = await Room_slot.collection().fetch();
+    let room_slots = await Room_slot.collection().fetch();
     res.render('room-slots/index', {
-        'roomSlots': roomSlots.toJSON()
+        'room_slots': room_slots.toJSON()
     })
 })
 
@@ -48,7 +48,6 @@ router.post('/create', async (req, res) => {
 
     roomSlotForm.handle(req, {
         'success': async (form) => {
-            // let numDays = (Date.parse(form.data.end_date) - Date.parse(form.data.start_date)) / 86400000 + 1;
             let slotsPerDay = form.data.slots;
             let roomsPerSlot = form.data.room_id;
             console.log(form.data);
@@ -68,17 +67,12 @@ router.post('/create', async (req, res) => {
             };
             let datesArray = addDay(Date.parse(form.data.start_date), Date.parse(form.data.end_date));
             
-            const allRoomTypes = await Room_type.fetchAll().map(roomType => {
-                return [roomType.get('id'), roomType.get('name'), roomType.get('base_hourly_cost')]
-            });
             // get an array of rooms and the room type name associated
             const allRooms = await Room.collection().fetch({
                 withRelated: ['roomType']
             }).map(room => {
                 return [room.get('id'), room.get('room_price'), room.get('room_type_id'), room.related('roomType').get('name')]
             });
-            console.log(allRooms);
-            // let roomsWithTypes = await allRooms;
             for (let eachDate of datesArray) {
                 let date = new Date(eachDate);
                 let dayOfWeek = date.getDay();
@@ -105,6 +99,28 @@ router.post('/create', async (req, res) => {
                 'form': form.toHTML(bootstrapField)
             })
         }
+    })
+})
+
+// update room slot
+router.get('/:room_slot_id/update', async(req, res)=> {
+    const slotId = req.params.room_slot_id;
+    const roomSlot = await Room_slot.where({
+        'id': slotId
+    }).fetch({
+        require: true
+    });
+
+    const roomSlotForm = updateRoomSlotForm();
+    roomSlotForm.fields.available.value = roomSlot.get('available');
+    roomSlotForm.fields.day_of_week.value = roomSlot.get('day_of_week');
+    roomSlotForm.fields.date.value = roomSlot.get('date');
+    roomSlotForm.fields.timeslot.value = roomSlot.get('timeslot');
+    roomSlotForm.fields.room_id.value = roomSlot.get('room_id');
+
+    res.render('room-slots/update', {
+        'form': roomSlotForm.toHTML(bootstrapField),
+        'roomSlot': roomSlot.toJSON()
     })
 })
 

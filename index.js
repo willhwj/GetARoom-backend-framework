@@ -1,6 +1,7 @@
 const express = require("express");
 const hbs = require("hbs");
 const wax = require("wax-on");
+
 require("dotenv").config();
 
 // create an instance of express app
@@ -8,6 +9,9 @@ let app = express();
 
 // set up the view engine
 app.set("view engine", "hbs");
+const helpers = require('handlebars-helpers')({
+    handlebars: hbs.handlebars
+});
 
 // static folder
 app.use(express.static("public"));

@@ -1,16 +1,54 @@
 {{#extends 'base'}}
 {{#block 'content'}}
 <a href='/room-slots/create' class='btn btn-primary sm m-3 py-0' >Create New Slots</a>
-<table>
+<table class='m-3 py-3'>
     <thead>
         <tr>
             <th>ID</th>
-            <th>Status</th>
+            <th>Room Type</th>
+            <th>Price Per Hour</th>
+            <th>Available?</th>
             <th>Day Of Week</th>
             <th>Date</th>
             <th>Timeslot</th>
+            <th>Room Id</th>
+            <th></th>
         </tr>
     </thead>
+    <tbody>
+        {{#each room_slots}}
+        <tr>
+            <td>
+                {{this.id}}
+            </td>
+            <td>
+                {{this.room_type}}
+            </td>
+            <td>
+                {{this.price}}
+            </td>
+            <td>
+                {{this.available}}
+            </td>
+            <td>
+                {{moment this.day_of_week 'dddd'}}
+            </td>
+            <td>
+                {{moment this.date 'YYYY-MM-DD'}}
+            </td>
+            <td>
+                {{moment this.timeslot 'h:mm:ss a'}}
+            </td>
+            <td>
+                {{this.room_id}}
+            </td>
+            <td>
+                <a href='/room-slots/{{this.id}}/update' class='btn btn-primary btn-sm py-0'>Update</a>
+                <a href='/room-slots/{{this.id}}/delete' class='btn btn-danger btn-sm py-0'>Delete</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
 </table>
 {{/block}}
 {{/extends}}

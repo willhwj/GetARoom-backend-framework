@@ -195,4 +195,48 @@ const createRoomSlotForm = (rooms) => {
     })
 }
 
-module.exports = { createRoomForm, createRoomTypeForm, createRoomSlotForm, bootstrapField };
+const updateRoomSlotForm = () => {
+    return forms.create({
+        'available': fields.boolean({
+            label: 'Available For Booking?',
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.checkbox({
+                classes: ['form-check']
+            })
+        }),
+        'day_of_week': fields.string({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            }
+        }),
+        'date': fields.date({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            }
+        }),
+        'timeslot': fields.array({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            }
+        }),
+        'room_id': fields.array({
+            label: 'Room number',
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            }
+        })
+    })
+}
+
+module.exports = { createRoomForm, createRoomTypeForm, createRoomSlotForm, updateRoomSlotForm, bootstrapField };
