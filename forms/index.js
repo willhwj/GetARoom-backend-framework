@@ -205,37 +205,45 @@ const updateRoomSlotForm = () => {
             },
             widget: widgets.checkbox({
                 classes: ['form-check']
-            })
+            }),
+            // widget: widgets.checkbox()
         }),
-        'day_of_week': fields.string({
-            required: true,
+        'price': fields.number({
             errorAfterField: true,
             cssClasses: {
-                label: ['form-label']
-            }
+                label:['form-label']
+            },
+            validators: [validators.required(), validators.integer()]
         }),
-        'date': fields.date({
-            required: true,
-            errorAfterField: true,
-            cssClasses: {
-                label: ['form-label']
-            }
-        }),
-        'timeslot': fields.array({
-            required: true,
-            errorAfterField: true,
-            cssClasses: {
-                label: ['form-label']
-            }
-        }),
-        'room_id': fields.array({
-            label: 'Room number',
-            required: true,
-            errorAfterField: true,
-            cssClasses: {
-                label: ['form-label']
-            }
-        })
+        // 'day_of_week': fields.string({
+        //     required: true,
+        //     errorAfterField: true,
+        //     cssClasses: {
+        //         label: ['form-label']
+        //     }
+        // }),
+        // 'date': fields.date({
+        //     required: true,
+        //     errorAfterField: true,
+        //     cssClasses: {
+        //         label: ['form-label']
+        //     }
+        // }),
+        // 'timeslot': fields.array({
+        //     required: true,
+        //     errorAfterField: true,
+        //     cssClasses: {
+        //         label: ['form-label']
+        //     }
+        // }),
+        // 'room_id': fields.array({
+        //     label: 'Room number',
+        //     required: true,
+        //     errorAfterField: true,
+        //     cssClasses: {
+        //         label: ['form-label']
+        //     }
+        // })
     })
 }
 

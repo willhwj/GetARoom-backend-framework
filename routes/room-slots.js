@@ -104,24 +104,75 @@ router.post('/create', async (req, res) => {
 
 // update room slot
 router.get('/:room_slot_id/update', async(req, res)=> {
-    const slotId = req.params.room_slot_id;
+    const roomSlotId = req.params.room_slot_id;
     const roomSlot = await Room_slot.where({
-        'id': slotId
+        'id': roomSlotId
     }).fetch({
         require: true
     });
 
     const roomSlotForm = updateRoomSlotForm();
-    roomSlotForm.fields.available.value = roomSlot.get('available');
-    roomSlotForm.fields.day_of_week.value = roomSlot.get('day_of_week');
-    roomSlotForm.fields.date.value = roomSlot.get('date');
-    roomSlotForm.fields.timeslot.value = roomSlot.get('timeslot');
-    roomSlotForm.fields.room_id.value = roomSlot.get('room_id');
+    roomSlotForm.fields.available.value = roomSlot.get('available')==='1'? true: false;
+    roomSlotForm.fields.price.value = roomSlot.get('price');
+    roomSlotForm.fields.price.readonly = true;
+    console.log(roomSlotForm.toHTML());
+    // roomSlotForm.fields.day_of_week.value = roomSlot.get('day_of_week');
+    // roomSlotForm.fields.date.value = roomSlot.get('date');
+    // roomSlotForm.fields.timeslot.value = roomSlot.get('timeslot');
+    // roomSlotForm.fields.room_id.value = roomSlot.get('room_id');
 
     res.render('room-slots/update', {
         'form': roomSlotForm.toHTML(bootstrapField),
         'roomSlot': roomSlot.toJSON()
     })
+})
+
+router.post('/:room_slot_id/update', async (req, res)=> {
+    const roomSlotId = req.params.room_slot_id;
+    const roomSlot = await Room_slot.where({
+        'id': roomSlotId
+    }).fetch({
+        require: true
+    });
+    const roomSlotForm = updateRoomSlotForm();
+    roomSlotForm.handle(req, {
+        'success': async(form) => {
+            console.log(form.data);
+            roomSlot.set(form.data);
+            roomSlot.save();
+            res.redirect('/room-slots');
+        },
+        'error': async(form)=> {
+            res.render('room-slots/update', {
+                'form': form.toHTML(bootstrapField),
+                'room': room.toJSON()
+            })
+        }
+    })
+})
+
+// delete slot
+router.get('/:room_slot_id/delete', async(req, res)=> {
+    const roomSlotId = req.params.room_slot_id;
+    const roomSlot = await Room_slot.where({
+        'id': roomSlotId
+    }).fetch({
+        require: true
+    });
+    res.render('room-slots/delete', {
+        'roomSlot': roomSlot.toJSON()
+    })
+})
+
+router.post('/:room_slot_id/delete', async(req, res)=> {
+    const roomSlotId = req.params.room_slot_id;
+    const roomSlot = await Room_slot.where({
+        'id': roomSlotId
+    }).fetch({
+        require: true
+    });
+    await roomSlot.destroy();
+    res.redirect('/room-slots');
 })
 
 module.exports = router;

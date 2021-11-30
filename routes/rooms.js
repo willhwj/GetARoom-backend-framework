@@ -84,7 +84,7 @@ router.post('/:room_id/update', async(req, res) => {
             res.redirect('/rooms');
         },
         'error': async(form)=> {
-            res.render('rooms/updates',{
+            res.render('rooms/update',{
                 'form': form.toHTML(bootstrapField),
                 'room': room.toJSON()
             })
