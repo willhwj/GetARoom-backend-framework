@@ -11,6 +11,7 @@
             <th>Room Size in Square Meters</th>
             <th>Base Hourly Cost</th>
             <th>Max Occupancy Allowed</th>
+            <th>Amenities</th>
             <th></th>
         </tr>
     </thead>
@@ -39,8 +40,13 @@
                 {{this.max_occupancy}}
             </td>
             <td>
-                <a href='/room-types/{{this.id}}/update' class='btn btn-primary btn-sm py-0' >Update</a>
-                <a href='/room-types/{{this.id}}/delete' class='btn btn-danger btn-sm py-0' >Delete</a>
+                {{#each this.amenities}}
+                <span class='badge bg-secondary m-1'>{{this.name}} </span>
+                {{/each}}
+            </td>
+            <td>
+                <a href='/room-types/{{this.id}}/update' class='btn btn-primary btn-sm py-0 m-1' >Update</a>
+                <a href='/room-types/{{this.id}}/delete' class='btn btn-danger btn-sm py-0 m-1' >Delete</a>
             </td>
         </tr>
         {{/each}}

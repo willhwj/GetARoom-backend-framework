@@ -1,0 +1,12 @@
+{{#extends 'base'}}
+{{#block 'content'}}
+<h1>Delete Amenity: {{amenity.name}} </h1>
+<form method='POST' class='m-3'>
+    <div>
+        <p>Are you sure you want to delete {{amenity.name}}?</p>
+        <input type='submit' class='btn btn-danger' value='Yes' />
+        <a href='/amenities' class='btn btn-success'>No</a>
+    </div>
+</form>
+{{/block}}
+{{/extends}}

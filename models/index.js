@@ -4,6 +4,9 @@ const Room_type = bookshelf.model('Room_type', {
     tableName: 'room_types',
     rooms() {
         return this.hasMany('Room')
+    },
+    amenities(){
+        return this.belongsToMany('Amenity');
     }
 });
 
@@ -22,6 +25,17 @@ const Room_slot = bookshelf.model('Room_slot', {
     room() {
         return this.belongsTo('Room')
     }
-})
+});
 
-module.exports = { Room_type, Room, Room_slot};
+const Amenity = bookshelf.model('Amenity', {
+    tableName: 'amenities',
+    roomTypes(){
+        return this.belongsToMany('Room_type')
+    }
+});
+
+const User = bookshelf.model('User', {
+    tableName: 'users'
+});
+
+module.exports = { Room_type, Room, Room_slot, Amenity, User};

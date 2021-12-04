@@ -50,7 +50,6 @@ router.post('/create', async (req, res) => {
         'success': async (form) => {
             let slotsPerDay = form.data.slots;
             let roomsPerSlot = form.data.room_id;
-            console.log(form.data);
             // recursive function to get an array of dates for this slot creation task
             const addDay = (current, end) => {
                 if (current === end) {
@@ -115,8 +114,8 @@ router.get('/:room_slot_id/update', async(req, res)=> {
     roomSlotForm.fields.available.value = roomSlot.get('available')==='1'? true: false;
     roomSlotForm.fields.price.value = roomSlot.get('price');
     roomSlotForm.fields.price.readonly = true;
-    console.log(roomSlotForm.toHTML());
-    // roomSlotForm.fields.day_of_week.value = roomSlot.get('day_of_week');
+    // console.log(roomSlotForm.toHTML());
+    roomSlotForm.fields.day_of_week.value = roomSlot.get('day_of_week');
     // roomSlotForm.fields.date.value = roomSlot.get('date');
     // roomSlotForm.fields.timeslot.value = roomSlot.get('timeslot');
     // roomSlotForm.fields.room_id.value = roomSlot.get('room_id');

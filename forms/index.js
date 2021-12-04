@@ -59,7 +59,7 @@ const createRoomForm = (roomTypes) => {
     })
 }
 
-const createRoomTypeForm = () => {
+const createRoomTypeForm = (amenities) => {
     return forms.create({
         'name': fields.string({
             required: true,
@@ -107,6 +107,16 @@ const createRoomTypeForm = () => {
                 label: ['form-label']
             },
             'validators': [validators.integer(), validators.max(20)]
+        }),
+        'amenities': fields.array({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label:['form-label']
+            },
+            widget: widgets.multipleSelect(),
+            choices: amenities,
+            validators: [validators.required()]
         })
     })
 };
@@ -215,13 +225,16 @@ const updateRoomSlotForm = () => {
             },
             validators: [validators.required(), validators.integer()]
         }),
-        // 'day_of_week': fields.string({
-        //     required: true,
-        //     errorAfterField: true,
-        //     cssClasses: {
-        //         label: ['form-label']
-        //     }
-        // }),
+        'day_of_week': fields.string({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.text({
+                classes: ['readol']
+            })
+        }),
         // 'date': fields.date({
         //     required: true,
         //     errorAfterField: true,
@@ -247,4 +260,72 @@ const updateRoomSlotForm = () => {
     })
 }
 
-module.exports = { createRoomForm, createRoomTypeForm, createRoomSlotForm, updateRoomSlotForm, bootstrapField };
+const createAmenityForm = ()=> {
+    return forms.create({
+        'name': fields.string({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            'validators': [validators.maxlength(100)]
+        }),
+        'description': fields.string({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label:['form-label']
+            },
+            'validators': [validators.maxlength(1000)]
+        })
+    })
+}
+
+const createRegistrationForm = ()=> {
+    return forms.create({
+        'username': fields.string({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            'validators': [validators.maxlength(100)]
+        }),
+        'email': fields.email({
+            required: true,
+            label: 'email address',
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.email()
+        }),
+        'password': fields.password({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.password()
+        }),
+        'confirm_password': fields.password({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.password(),
+            validators: [validators.matchField('password')]
+        }),
+        'phone_number': fields.tel({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.tel()
+        })
+    })
+}
+
+module.exports = { createRoomForm, createRoomTypeForm, createRoomSlotForm, updateRoomSlotForm, createAmenityForm, createRegistrationForm, bootstrapField };
