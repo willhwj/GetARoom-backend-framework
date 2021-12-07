@@ -1,8 +1,9 @@
 {
     "dev": {
-        "driver": "mysql",
-        "user": "room",
-        "password": "Ch1ck3nr1c3!23",
-        "database": "get_a_room"
+        "driver": {"ENV": "DB_DRIVER"},
+        "user": {"ENV": "DB_USER"},
+        "password": {"ENV": "DB_PASSWORD"},
+        "database": {"ENV": "DB_DATABASE"},
+        "host": {"ENV": "DB_HOST"}
     }
 }

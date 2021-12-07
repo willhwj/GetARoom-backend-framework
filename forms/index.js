@@ -117,6 +117,9 @@ const createRoomTypeForm = (amenities) => {
             widget: widgets.multipleSelect(),
             choices: amenities,
             validators: [validators.required()]
+        }),
+        'image_url': fields.string({
+            widget: widgets.hidden()
         })
     })
 };
@@ -281,7 +284,7 @@ const createAmenityForm = ()=> {
     })
 }
 
-const createRegistrationForm = ()=> {
+const registrationForm = ()=> {
     return forms.create({
         'username': fields.string({
             required: true,
@@ -328,4 +331,115 @@ const createRegistrationForm = ()=> {
     })
 }
 
-module.exports = { createRoomForm, createRoomTypeForm, createRoomSlotForm, updateRoomSlotForm, createAmenityForm, createRegistrationForm, bootstrapField };
+const loginForm = () => {
+    return forms.create({
+        'email': fields.email({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            }
+        }),
+        'password': fields.password({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            }
+        }),
+    })
+}
+
+const searchForm = (amenities) => {
+    return forms.create({
+        'room_type_name': fields.string({
+            required: false,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            }
+        }),
+        'min_price': fields.number({
+            required: false,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            'validators': [validators.integer()]
+        }),
+        'max_price': fields.number({
+            required: false,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            'validators': [validators.integer()]
+        }),
+        'date': fields.date({
+            required: false,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.date()
+        }),
+        'starting_time': fields.array({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.select(),
+            choices: {
+                'Morning': {
+                    '08:00:00': '8:00am', '09:00:00': '9:00am', '10:00:00': '10:00am', '11:00:00': '11:00am', '12:00:00': '12:00pm'
+                },
+                'Afternoon': {
+                    '13:00:00': '1:00pm', '14:00:00': '2:00pm', '15:00:00': '3:00pm', '16:00:00': '4:00pm', '17:00:00': '5:00pm'
+                },
+                'Evening': {
+                    '18:00:00': '6:00pm', '19:00:00': '7:00pm', '20:00:00': '8:00pm', '21:00:00': '9:00pm', '22:00:00': '10:00pm'
+                }
+            }
+        }),
+        'ending_time': fields.array({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.select(),
+            choices: {
+                'Morning': {
+                    '09:00:00': '9:00am', '10:00:00': '10:00am', '11:00:00': '11:00am', '12:00:00': '12:00pm'
+                },
+                'Afternoon': {
+                    '13:00:00': '1:00pm', '14:00:00': '2:00pm', '15:00:00': '3:00pm', '16:00:00': '4:00pm', '17:00:00': '5:00pm'
+                },
+                'Evening': {
+                    '18:00:00': '6:00pm', '19:00:00': '7:00pm', '20:00:00': '8:00pm', '21:00:00': '9:00pm', '22:00:00': '10:00pm'
+                }
+            },
+            validators: [
+                function(form, field, callback) {
+                    if(field.data < form.fields['starting_time'].data){
+                        callback('ending time must be later than starting time')
+                    } else {
+                        callback()
+                    }
+                }
+            ]
+        }),
+        'amenity': fields.array({
+            required: true,
+            errorAfterField: true,
+            cssClasses: {
+                label: ['form-label']
+            },
+            widget: widgets.multipleSelect(),
+            choices: amenities
+        })
+    })
+}
+
+module.exports = { createRoomForm, createRoomTypeForm, createRoomSlotForm, updateRoomSlotForm, createAmenityForm, registrationForm, loginForm, searchForm, bootstrapField };

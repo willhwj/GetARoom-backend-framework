@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();
 // import in the forms
 const { bootstrapField, createRoomTypeForm } = require('../forms');
+// import in checkIfAuthenticated middleware
+const { checkIfAuthenticated} = require('../middleware');
 
 // import in the Room_type model
 const { Room_type, Amenity } = require('../models');
 
 // display room types
-router.get('/', async (req, res) => {
+router.get('/', checkIfAuthenticated, async (req, res) => {
     //  fetch all room types, i.e. SELECT * FROM room_types table
     let room_types = await Room_type.collection().fetch({
         withRelated: ['amenities']
@@ -18,15 +20,18 @@ router.get('/', async (req, res) => {
 });
 
 // create room types
-router.get('/create', async (req, res) => {
+router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allAmenities = await Amenity.fetchAll().map( amenity => [amenity.get('id'), amenity.get('name')]);
     const roomTypeForm = createRoomTypeForm(allAmenities);
     res.render('room-types/create', {
-        'form': roomTypeForm.toHTML(bootstrapField)
+        'form': roomTypeForm.toHTML(bootstrapField),
+        cloudinaryName: process.env.CLOUDINARY_NAME,
+        cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+        cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET
     })
 });
 
-router.post('/create', async (req, res) => {
+router.post('/create', checkIfAuthenticated, async (req, res) => {
     const roomTypeForm = createRoomTypeForm();
     roomTypeForm.handle(req, {
         'success': async (form) => {
@@ -56,7 +61,7 @@ router.post('/create', async (req, res) => {
 })
 
 // update existing room types
-router.get('/:room_type_id/update', async (req, res) => {
+router.get('/:room_type_id/update', checkIfAuthenticated, async (req, res) => {
     const roomTypeId = req.params.room_type_id;
     const room_type = await Room_type.where({
         'id': roomTypeId
@@ -73,6 +78,7 @@ router.get('/:room_type_id/update', async (req, res) => {
     roomTypeForm.fields.room_size.value = room_type.get('room_size');
     roomTypeForm.fields.base_hourly_cost.value = room_type.get('base_hourly_cost');
     roomTypeForm.fields.max_occupancy.value = room_type.get('max_occupancy');
+    roomTypeForm.fields.image_url.value = room_type.get('image_url');
 
     let selectedAmenities = await room_type.related('amenities').pluck('id');
     roomTypeForm.fields.amenities.value = selectedAmenities;
@@ -80,11 +86,14 @@ router.get('/:room_type_id/update', async (req, res) => {
     // console.log(roomTypeForm.fields.max_occupancy, roomTypeForm.fields.max_occupancy,);
     res.render('room-types/update', {
         'form': roomTypeForm.toHTML(bootstrapField),
-        'roomType': room_type.toJSON()
+        'roomType': room_type.toJSON(),
+        cloudinaryName: process.env.CLOUDINARY_NAME,
+        cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+        cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET
     })
 })
 
-router.post('/:room_type_id/update', async (req, res) => {
+router.post('/:room_type_id/update', checkIfAuthenticated, async (req, res) => {
     const room_type = await Room_type.where({
         'id': req.params.room_type_id
     }).fetch({
@@ -115,7 +124,7 @@ router.post('/:room_type_id/update', async (req, res) => {
 })
 
 // delete room type
-router.get('/:room_type_id/delete', async (req, res) => {
+router.get('/:room_type_id/delete', checkIfAuthenticated, async (req, res) => {
     const room_type = await Room_type.where({
         'id': req.params.room_type_id
     }).fetch({
@@ -127,7 +136,7 @@ router.get('/:room_type_id/delete', async (req, res) => {
     })
 })
 
-router.post('/:room_type_id/delete', async (req, res) => {
+router.post('/:room_type_id/delete', checkIfAuthenticated, async (req, res) => {
     const room_type = await Room_type.where({
         'id': req.params.room_type_id
     }).fetch({

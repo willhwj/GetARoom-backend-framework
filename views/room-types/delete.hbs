@@ -2,6 +2,7 @@
 {{#block 'content'}}
 <h1>Delete Room Type: {{roomType.name}} </h1>
 <form method='POST' class='m-3' >
+    <input type='hidden' name='_csrf' value='{{csrfToken}}' />
     <div>
         <p>Are you sure you want to delete {{roomType.name}}?</p>
         <input type='submit' class='btn btn-danger' value='Yes' />

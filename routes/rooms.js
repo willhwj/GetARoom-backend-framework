@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const {bootstrapField, createRoomForm} = require('../forms');
 const { Room, Room_type} = require('../models');
+// import in checkIfAuthenticated middleware
+const { checkIfAuthenticated} = require('../middleware');
 
 // display rooms
-router.get('/', async(req, res) =>{
+router.get('/', checkIfAuthenticated, async(req, res) =>{
     let rooms = await Room.collection().fetch();
     res.render('rooms/index', {
         'rooms': rooms.toJSON()
@@ -12,7 +14,7 @@ router.get('/', async(req, res) =>{
 });
 
 // create rooms
-router.get('/create', async(req, res)=> {
+router.get('/create', checkIfAuthenticated, async(req, res)=> {
     const allRoomTypes = await Room_type.fetchAll().map(roomType => {
         return [roomType.get('id'), roomType.get('name')];
     });
@@ -22,7 +24,7 @@ router.get('/create', async(req, res)=> {
     })
 });
 
-router.post('/create', async (req, res)=> {
+router.post('/create', checkIfAuthenticated, async (req, res)=> {
     const allRoomTypes = await Room_type.fetchAll().map(roomType => {
         return [roomType.get('id'), roomType.get('name')];
     })  
@@ -45,7 +47,7 @@ router.post('/create', async (req, res)=> {
 })
 
 // update rooms
-router.get('/:room_id/update', async(req, res) => {
+router.get('/:room_id/update', checkIfAuthenticated, async(req, res) => {
     const roomId = req.params.room_id;
     const room = await Room.where({
         'id': roomId
@@ -66,7 +68,7 @@ router.get('/:room_id/update', async(req, res) => {
     })
 })
 
-router.post('/:room_id/update', async(req, res) => {
+router.post('/:room_id/update', checkIfAuthenticated, async(req, res) => {
     const roomId = req.params.room_id;
     const room = await Room.where({
         'id': roomId
@@ -93,7 +95,7 @@ router.post('/:room_id/update', async(req, res) => {
 })
 
 // delete a room
-router.get('/:room_id/delete', async (req, res) => {
+router.get('/:room_id/delete', checkIfAuthenticated, async (req, res) => {
     const roomId = req.params.room_id;
     const room = await Room.where({
         'id': roomId
@@ -105,7 +107,7 @@ router.get('/:room_id/delete', async (req, res) => {
     })
 })
 
-router.post('/:room_id/delete', async (req, res) => {
+router.post('/:room_id/delete', checkIfAuthenticated, async (req, res) => {
     const roomId = req.params.room_id;
     const room = await Room.where({
         'id': roomId

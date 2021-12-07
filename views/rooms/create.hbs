@@ -2,6 +2,7 @@
 {{#block 'content'}}
 <h1>Create New Room</h1>
 <form method='POST' class='m-3'>
+    <input type='hidden' name='_csrf' value='{{csrfToken}}' />
     {{{form}}}
     <input type='submit' value='Add Room' class='btn btn-primary'>
     <a href='/rooms' class='btn btn-secondary sm my-3'>Cancel</a>

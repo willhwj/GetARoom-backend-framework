@@ -1,6 +1,10 @@
 {{#extends 'base'}}
 {{#block 'content'}}
 <a href='/room-slots/create' class='btn btn-primary sm m-3 py-0' >Create New Slots</a>
+<form method='GET' class='m-3'>
+    {{{form}}}
+    <input type='submit' class='mb-3 mt-3 btn btn-primary' value='Search'/>
+</form>
 <table class='table m-3'>
     <thead>
         <tr>

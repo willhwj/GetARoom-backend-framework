@@ -8,6 +8,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const FileStore = require('session-file-store')(session);
 
+const csrf = require('csurf');
+
 // create an instance of express app
 let app = express();
 
@@ -32,19 +34,43 @@ app.use(express.urlencoded({
 // use sessions
 app.use(session({
     store: new FileStore(),
-    secret: 'keyboard cat',
+    secret: process.env.SESSION_SECRET_KEY,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    // cookie: { secure: true}
 }))
 
 // set up flash
 app.use(flash());
 // register flash middleware
+// app.use(function(req, res, next){
+//     res.locals.success_messages = req.flash('success_messages');
+//     // console.log('locals is inside middleware', res.locals.success_messages);
+//     res.locals.error_messages = req.flash('error_messages');
+//     console.log(req.session);
+//     next();
+// })
+
+// share user data with all hbs files
 app.use(function(req, res, next){
-    console.log(req.session);
-    res.locals.success_messages = req.flash('success_messages');
-    console.log('locals is inside middleware', res.locals.success_messages);
-    res.locals.error_messages = req.flash('error_messages');
+    res.locals.user = req.session.user;
+    next();
+})
+
+// enable CSRF
+app.use(csrf());
+// handle CSRF error
+app.use(function (err, req, res, next){
+    if(err && err.code =='EBADCSRFTOKEN'){
+        req.flash('error_messages', 'The form has experied. Please try again');
+        res.redirect('back');
+    } else{
+        next()
+    }
+})
+// share CSRF with hbs files
+app.use(function(req, res, next){
+    res.locals.csrfToken = req.csrfToken();
     next();
 })
 
@@ -54,6 +80,8 @@ const roomTypeRoutes = require('./routes/room-types');
 const roomRoutes = require('./routes/rooms');
 const roomSlotRoutes = require('./routes/room-slots');
 const amenityRoutes = require('./routes/amenities');
+const userRoutes = require('./routes/users');
+const cloudinaryRoutes = require('./routes/cloudinary');
 
 async function main(){
 
@@ -62,6 +90,8 @@ async function main(){
     app.use('/rooms', roomRoutes);
     app.use('/room-slots', roomSlotRoutes);
     app.use('/amenities', amenityRoutes);
+    app.use('/users', userRoutes);
+    app.use('/cloudinary', cloudinaryRoutes);
 }
 
 main();

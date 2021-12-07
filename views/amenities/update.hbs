@@ -2,6 +2,7 @@
 {{#block 'content'}}
 <h1 class='m-3'>Update Amenity with ID: {{amenity.id}} </h1>
 <form class='m-3' method='POST'>
+    <input type='hidden' name='_csrf' value='{{csrfToken}}' />
     {{{form}}}
     <input type='submit' value='Update Amenity' class='btn btn-primary my-3' />
     <a href='/amenities' class='btn btn-secondary sm my-3'>Cancel</a>

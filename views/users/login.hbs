@@ -1,11 +1,11 @@
 {{#extends 'base'}}
 {{#block 'content'}}
-<h1>Create New Slots by Date</h1>
+<h1 class='m-3'>Login</h1>
+<p class='m-3'>Please login with your account</p>
 <form method='POST' class='m-3'>
     <input type='hidden' name='_csrf' value='{{csrfToken}}' />
     {{{form}}}
-    <input type='submit' value='Add Room Slots' class='btn btn-primary' />
-    <a href='/room-slots' class='btn btn-secondary sm my-3'>Cancel</a>
+    <input type='submit' class='btn btn-primary' value='Login' />
 </form>
 {{/block}}
 {{/extends}}

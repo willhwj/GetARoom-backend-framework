@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 // import in the forms
 const {bootstrapField, createAmenityForm} = require('../forms');
-
+// import in checkIfAuthenticated middleware
+const { checkIfAuthenticated} = require('../middleware');
 // import in the Amenity model
 const { Amenity} = require('../models');
 
 // display amenities
-router.get('/', async(req, res) =>{
+router.get('/', checkIfAuthenticated, async(req, res) =>{
     let amenities = await Amenity.collection().fetch();
     res.render('amenities/index', {
         'amenities': amenities.toJSON()
@@ -15,14 +16,14 @@ router.get('/', async(req, res) =>{
 });
 
 // create amenities
-router.get('/create', async(req, res)=> {
+router.get('/create', checkIfAuthenticated, async(req, res)=> {
     const amenityForm = createAmenityForm();
     res.render('amenities/create', {
         'form': amenityForm.toHTML(bootstrapField)
     })
 });
 
-router.post('/create', async(req, res)=> {
+router.post('/create', checkIfAuthenticated, async(req, res)=> {
     const amenityForm = createAmenityForm();
     amenityForm.handle(req, {
         'success': async (form)=> {
@@ -39,7 +40,7 @@ router.post('/create', async(req, res)=> {
 })
 
 // update amenity
-router.get('/:amenity_id/update', async(req, res)=> {
+router.get('/:amenity_id/update', checkIfAuthenticated, async(req, res)=> {
     const amenityId = req.params.amenity_id;
     const amenity = await Amenity.where({
         'id': amenityId
@@ -57,7 +58,7 @@ router.get('/:amenity_id/update', async(req, res)=> {
     })
 })
 
-router.post('/:amenity_id/update', async(req, res)=> {
+router.post('/:amenity_id/update', checkIfAuthenticated, async(req, res)=> {
     const amenity = await Amenity.where({
         'id': req.params.amenity_id
     }).fetch({
@@ -81,7 +82,7 @@ router.post('/:amenity_id/update', async(req, res)=> {
 })
 
 // delete amenity
-router.get('/:amenity_id/delete', async(req, res)=> {
+router.get('/:amenity_id/delete', checkIfAuthenticated, async(req, res)=> {
     const amenity = await Amenity.where({
         'id': req.params.amenity_id,
     }).fetch({
@@ -93,7 +94,7 @@ router.get('/:amenity_id/delete', async(req, res)=> {
     })
 });
 
-router.post('/:amenity_id/delete', async(req, res)=> {
+router.post('/:amenity_id/delete', checkIfAuthenticated, async(req, res)=> {
     const amenity = await Amenity.where({
         'id': req.params.amenity_id
     }).fetch({

@@ -1,18 +1,81 @@
 const express = require('express');
 const router = express.Router();
-const { bootstrapField, createRoomSlotForm, updateRoomSlotForm } = require('../forms');
-const { Room_slot, Room, Room_type } = require('../models');
+const { bootstrapField, createRoomSlotForm, updateRoomSlotForm, searchForm } = require('../forms');
+// import in checkIfAuthenticated middleware
+const { checkIfAuthenticated} = require('../middleware');
+
+const { Room_slot, Room, Room_type, Amenity } = require('../models');
 
 // display room slots
-router.get('/', async (req, res) => {
-    let room_slots = await Room_slot.collection().fetch();
-    res.render('room-slots/index', {
-        'room_slots': room_slots.toJSON()
+router.get('/', checkIfAuthenticated, async (req, res) => {
+    // let room_slots = await Room_slot.collection().fetch();
+    // res.render('room-slots/index', {
+    //     'room_slots': room_slots.toJSON()
+    // })
+
+    const allAmenities = await Amenity.fetchAll().map(amenity => [amenity.get('id'), amenity.get('name')]);
+    allAmenities.unshift([0, '-----']);
+    let searchEngine = searchForm(allAmenities);
+    let q = await Room_slot.collection().fetch();
+
+    searchEngine.handle(req, {
+        'empty': async(form)=> {
+            let room_slots = await q.fetch({
+                // withRelated: ['amenity']
+            });
+            res.render('room-slots/index', {
+                'room_slots': room_slots.toJSON(),
+                'form': form.toHTML(bootstrapField)
+            })
+        },
+        'error': async(form)=> {
+            let room_slots = await q.fetch();
+            res.render('room-slots/index', {
+                'room_slots': room_slots.toJSON(),
+                'form': form.toHTML(bootstrapField)
+            })
+        },
+        'success': async(form)=> {
+            if (form.data.room_type_name) {
+                q = q.where('room_type', 'like', '%' + req.query.room_type_name + '%')
+            }
+            if (form.data.min_price) {
+                q = q.where('price', '>=', req.query.min_price)
+            }
+            if (form.data.max_cost) {
+                q = q.where('price', '<=', req.query.max_cost)
+            }
+            if (form.data.date) {
+                q = q.where('date', '=', req.query.date)
+            }
+            if (form.data.starting_time) {
+                q = q.where('timeslot', '>=', req.query.starting_time)
+            }
+            if (form.data.ending_time) {
+                q = q.where('timeslot', '<=', req.query.ending_time)
+            }
+            if (form.data.amenity) {
+                // SQL statement:
+                // SELECT * FROM room_slots
+                // JOIN
+                // rooms
+                // ON room_slots.room_id = rooms.id
+                // JOIN room_types
+                // on rooms.room_type_id = room_types.id
+                q = q.query('join', 'room_types', 'room_type', 'room_types.name', 'join', 'amenities_room_types', 'room_types.id', 'room_type_id').where('amenity_id', 'in', form.data.amenity)
+            }
+
+            let room_slots = await q.fetch();
+            res.render('room-slots/index', {
+                'room_slots': room_slots.toJSON(),
+                'form': form.toHTML(bootstrapField)
+            })
+        }
     })
 })
 
 // create room slots 
-router.get('/create', async (req, res) => {
+router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allRoomTypes = await Room_type.fetchAll().map(roomType => {
         return [roomType.get('id'), roomType.get('name')];
     });
@@ -32,7 +95,7 @@ router.get('/create', async (req, res) => {
     })
 })
 
-router.post('/create', async (req, res) => {
+router.post('/create', checkIfAuthenticated, async (req, res) => {
     const allRoomTypes = await Room_type.fetchAll().map(roomType => {
         return [roomType.get('id'), roomType.get('name')];
     });
@@ -102,34 +165,34 @@ router.post('/create', async (req, res) => {
 })
 
 // update room slot
-router.get('/:room_slot_id/update', async(req, res)=> {
-    const roomSlotId = req.params.room_slot_id;
-    const roomSlot = await Room_slot.where({
-        'id': roomSlotId
+router.get('/:room_slot_id/update', checkIfAuthenticated, async(req, res)=> {
+    const room_slot_id = req.params.room_slot_id;
+    const room_slot = await Room_slot.where({
+        'id': room_slot_id
     }).fetch({
         require: true
     });
 
     const roomSlotForm = updateRoomSlotForm();
-    roomSlotForm.fields.available.value = roomSlot.get('available')==='1'? true: false;
-    roomSlotForm.fields.price.value = roomSlot.get('price');
+    roomSlotForm.fields.available.value = room_slot.get('available')==='1'? true: false;
+    roomSlotForm.fields.price.value = room_slot.get('price');
     roomSlotForm.fields.price.readonly = true;
     // console.log(roomSlotForm.toHTML());
-    roomSlotForm.fields.day_of_week.value = roomSlot.get('day_of_week');
-    // roomSlotForm.fields.date.value = roomSlot.get('date');
-    // roomSlotForm.fields.timeslot.value = roomSlot.get('timeslot');
-    // roomSlotForm.fields.room_id.value = roomSlot.get('room_id');
+    roomSlotForm.fields.day_of_week.value = room_slot.get('day_of_week');
+    // roomSlotForm.fields.date.value = room_slot.get('date');
+    // roomSlotForm.fields.timeslot.value = room_slot.get('timeslot');
+    // roomSlotForm.fields.room_id.value = room_slot.get('room_id');
 
     res.render('room-slots/update', {
         'form': roomSlotForm.toHTML(bootstrapField),
-        'roomSlot': roomSlot.toJSON()
+        'room_slot': room_slot.toJSON()
     })
 })
 
-router.post('/:room_slot_id/update', async (req, res)=> {
-    const roomSlotId = req.params.room_slot_id;
-    const roomSlot = await Room_slot.where({
-        'id': roomSlotId
+router.post('/:room_slot_id/update', checkIfAuthenticated, async (req, res)=> {
+    const room_slot_id = req.params.room_slot_id;
+    const room_slot = await Room_slot.where({
+        'id': room_slot_id
     }).fetch({
         require: true
     });
@@ -137,8 +200,8 @@ router.post('/:room_slot_id/update', async (req, res)=> {
     roomSlotForm.handle(req, {
         'success': async(form) => {
             console.log(form.data);
-            roomSlot.set(form.data);
-            roomSlot.save();
+            room_slot.set(form.data);
+            room_slot.save();
             res.redirect('/room-slots');
         },
         'error': async(form)=> {
@@ -151,27 +214,53 @@ router.post('/:room_slot_id/update', async (req, res)=> {
 })
 
 // delete slot
-router.get('/:room_slot_id/delete', async(req, res)=> {
-    const roomSlotId = req.params.room_slot_id;
-    const roomSlot = await Room_slot.where({
-        'id': roomSlotId
+router.get('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
+    const room_slot_id = req.params.room_slot_id;
+    const room_slot = await Room_slot.where({
+        'id': room_slot_id
     }).fetch({
         require: true
     });
     res.render('room-slots/delete', {
-        'roomSlot': roomSlot.toJSON()
+        'room_slot': room_slot.toJSON()
     })
 })
 
-router.post('/:room_slot_id/delete', async(req, res)=> {
-    const roomSlotId = req.params.room_slot_id;
-    const roomSlot = await Room_slot.where({
-        'id': roomSlotId
+router.post('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
+    const room_slot_id = req.params.room_slot_id;
+    const room_slot = await Room_slot.where({
+        'id': room_slot_id
     }).fetch({
         require: true
     });
-    await roomSlot.destroy();
+    await room_slot.destroy();
     res.redirect('/room-slots');
+})
+
+// search slots
+router.get('/search', checkIfAuthenticated, async(req, res)=> {
+    const allAmenities = await Amenity.fetchAll().map(amenity => [amenity.get('id'), amenity.get('name')]);
+    allAmenities.unshift([0, '-----']);
+    let searchEngine = searchForm(allAmenities);
+    let q = Room_slot.collection();
+
+    searchEngine.handle(req, {
+        'empty': async(form)=> {
+            let room_slots = await q.fetch({
+                withRelated: ['amenity']
+            });
+            res.render('room-slots/index', {
+                'room_slots': room_slots.toJSON(),
+                'form': form.toHTML(bootstrapField)
+            })
+        },
+        'error': async(form)=> {
+
+        },
+        'success': async(form)=> {
+            
+        }
+    })
 })
 
 module.exports = router;

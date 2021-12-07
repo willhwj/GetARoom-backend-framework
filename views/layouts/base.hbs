@@ -46,11 +46,25 @@
             <li class="nav-item">
               <a class="nav-link" href="/amenities">Amenity</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users/register">User</a>
+            </li>
           </ul>
         </div>
       </div>
+      <div>
+        {{#if user}}
+          Hi,
+          {{user.username}}
+          <a href="/users/logout" class="ml-3 btn btn-primary btn-sm">Logout</a>
+        {{else}}
+          Hi, stranger
+          <a href="/users/login" class="ml-3 btn btn-primary btn-sm">Login</a>
+        {{/if}}
+      </div>
     </nav>
-    <div class='container'>
+
+    <section class="container">
       {{#if success_messages}}
         {{#each success_messages}}
           <div class="alert alert-success">
@@ -65,10 +79,10 @@
           </div>
         {{/each}}
       {{/if}}
-    </div>
-    <div>
+    </section>
+    <section>
       {{#block "content"}}{{/block}}
-    </div>
+    </section>
 
     {{! Bootstrap 5.1 JS }}
     <script
@@ -76,11 +90,16 @@
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
       crossorigin="anonymous"
     ></script>
+    {{!-- custom JS script to select form elements with readol class, and make these elements read-only by injecting the attribute 'readonly' --}}
     <script type="text/javascript">
-      window.addEventListener('load', function() { let target =
-      document.getElementsByClassName('readol'); let targetList =
-      Array.prototype.slice.call(target); targetList.forEach((x)=> {
-      x.setAttribute('readonly', 'readonly') }); })
+      window.addEventListener('load', function() { 
+          let target = document.getElementsByClassName('readol'); 
+          let targetList = Array.prototype.slice.call(target); targetList.forEach((x)=> {
+            x.setAttribute('readonly', 'readonly') 
+            }); 
+        })
     </script>
+    {{#block "js"}}
+    {{/block}}
   </body>
 </html>
