@@ -430,15 +430,15 @@ const searchForm = (amenities) => {
                 }
             ]
         }),
-        'amenity': fields.array({
-            required: true,
-            errorAfterField: true,
-            cssClasses: {
-                label: ['form-label']
-            },
-            widget: widgets.multipleSelect(),
-            choices: amenities
-        })
+        // 'amenity': fields.array({
+        //     required: true,
+        //     errorAfterField: true,
+        //     cssClasses: {
+        //         label: ['form-label']
+        //     },
+        //     widget: widgets.multipleSelect(),
+        //     choices: amenities
+        // })
     })
 }
 

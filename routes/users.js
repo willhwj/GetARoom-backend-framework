@@ -48,6 +48,7 @@ router.get('/login', (req, res) => {
     const login = loginForm();
     console.log('#######');
     console.log(req.session);
+    console.log('#######');
     res.render('users/login', {
         'form': login.toHTML(bootstrapField)
     })
@@ -71,14 +72,20 @@ router.post('/login', (req, res) => {
             } else {
                 if (user.get('password') === getHashedPassword(form.data.password)) {
                     console.log('success');
+                    console.log('$$$$$$$');
                     console.log(req.session);
+                    console.log('$$$$$$$');
                     req.session.user = {
                         id: user.get('id'),
                         username: user.get('username'),
                         email: user.get('email')
                     };
                     req.flash('success_messages', `Welcome back, ${user.get('username')}`);
-                    res.redirect('/users/profile');
+                    req.session.save(function(err) {
+                        // session saved
+                        res.redirect('/users/profile');
+                      })
+                    
                 } else {
                     console.log('success, but password not matched');
                     req.flash('error_messages', 'Sorry, the authentication details you provides does not work.');

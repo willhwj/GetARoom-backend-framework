@@ -7,7 +7,7 @@ const { checkIfAuthenticated} = require('../middleware');
 const { Room_slot, Room, Room_type, Amenity } = require('../models');
 
 // display room slots
-router.get('/', checkIfAuthenticated, async (req, res) => {
+router.get('/', async (req, res) => {
     // let room_slots = await Room_slot.collection().fetch();
     // res.render('room-slots/index', {
     //     'room_slots': room_slots.toJSON()
@@ -15,7 +15,8 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
 
     const allAmenities = await Amenity.fetchAll().map(amenity => [amenity.get('id'), amenity.get('name')]);
     allAmenities.unshift([0, '-----']);
-    let searchEngine = searchForm(allAmenities);
+    // let searchEngine = searchForm(allAmenities);
+    let searchEngine = searchForm();
     let q = await Room_slot.collection().fetch();
 
     searchEngine.handle(req, {
@@ -36,8 +37,10 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
             })
         },
         'success': async(form)=> {
+            console.log(form.data);
             if (form.data.room_type_name) {
-                q = q.where('room_type', 'like', '%' + req.query.room_type_name + '%')
+                // q = q.where('room_type', 'like', '%' + req.query.room_type_name + '%')
+                q = q.where('room_type', 'like', '%' + form.data.room_type_name + '%')
             }
             if (form.data.min_price) {
                 q = q.where('price', '>=', req.query.min_price)
@@ -46,13 +49,22 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
                 q = q.where('price', '<=', req.query.max_cost)
             }
             if (form.data.date) {
+                // let date = new Date(form.data.date);
                 q = q.where('date', '=', req.query.date)
             }
             if (form.data.starting_time) {
-                q = q.where('timeslot', '>=', req.query.starting_time)
+                let startSlot = form.data.date + ' ' + form.data.starting_time;
+                console.log('startSlot: ', startSlot);
+                let startTime = new Date(startSlot);
+                console.log('startTime: ', startTime);
+                q = q.where('timeslot', '>=', startTime)
             }
             if (form.data.ending_time) {
-                q = q.where('timeslot', '<=', req.query.ending_time)
+                let endSlot = form.data.date + ' ' + form.data.ending_time;
+                console.log('endSlot: ', endSlot);
+                let endTime = new Date(endSlot); 
+                console.log('endTime: ', endTime);
+                q = q.where('timeslot', '<=', endTime)
             }
             if (form.data.amenity) {
                 // SQL statement:
@@ -62,10 +74,20 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
                 // ON room_slots.room_id = rooms.id
                 // JOIN room_types
                 // on rooms.room_type_id = room_types.id
-                q = q.query('join', 'room_types', 'room_type', 'room_types.name', 'join', 'amenities_room_types', 'room_types.id', 'room_type_id').where('amenity_id', 'in', form.data.amenity)
+                let arrayAmenities = form.data.amenity.map(eachAmenity => {
+                    return parseInt(eachAmenity)
+                });
+                console.log(arrayAmenities);
+                q = q.where('id', 'in', arrayAmenities)
+
+                // q = q.query(
+                //     'join', 'room_types', 'room_type', 'room_types.name', 
+                //     )
             }
 
-            let room_slots = await q.fetch();
+            let room_slots = await q.fetch({
+                // withRelated: ['rooms.room_types.amenities']
+            });
             res.render('room-slots/index', {
                 'room_slots': room_slots.toJSON(),
                 'form': form.toHTML(bootstrapField)
@@ -75,7 +97,7 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
 })
 
 // create room slots 
-router.get('/create', checkIfAuthenticated, async (req, res) => {
+router.get('/create', async (req, res) => {
     const allRoomTypes = await Room_type.fetchAll().map(roomType => {
         return [roomType.get('id'), roomType.get('name')];
     });
@@ -95,7 +117,7 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     })
 })
 
-router.post('/create', checkIfAuthenticated, async (req, res) => {
+router.post('/create', async (req, res) => {
     const allRoomTypes = await Room_type.fetchAll().map(roomType => {
         return [roomType.get('id'), roomType.get('name')];
     });
@@ -165,7 +187,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
 })
 
 // update room slot
-router.get('/:room_slot_id/update', checkIfAuthenticated, async(req, res)=> {
+router.get('/:room_slot_id/update', async(req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await Room_slot.where({
         'id': room_slot_id
@@ -189,7 +211,7 @@ router.get('/:room_slot_id/update', checkIfAuthenticated, async(req, res)=> {
     })
 })
 
-router.post('/:room_slot_id/update', checkIfAuthenticated, async (req, res)=> {
+router.post('/:room_slot_id/update', async (req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await Room_slot.where({
         'id': room_slot_id
@@ -214,7 +236,7 @@ router.post('/:room_slot_id/update', checkIfAuthenticated, async (req, res)=> {
 })
 
 // delete slot
-router.get('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
+router.get('/:room_slot_id/delete', async(req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await Room_slot.where({
         'id': room_slot_id
@@ -226,7 +248,7 @@ router.get('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
     })
 })
 
-router.post('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
+router.post('/:room_slot_id/delete', async(req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await Room_slot.where({
         'id': room_slot_id
@@ -235,32 +257,6 @@ router.post('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
     });
     await room_slot.destroy();
     res.redirect('/room-slots');
-})
-
-// search slots
-router.get('/search', checkIfAuthenticated, async(req, res)=> {
-    const allAmenities = await Amenity.fetchAll().map(amenity => [amenity.get('id'), amenity.get('name')]);
-    allAmenities.unshift([0, '-----']);
-    let searchEngine = searchForm(allAmenities);
-    let q = Room_slot.collection();
-
-    searchEngine.handle(req, {
-        'empty': async(form)=> {
-            let room_slots = await q.fetch({
-                withRelated: ['amenity']
-            });
-            res.render('room-slots/index', {
-                'room_slots': room_slots.toJSON(),
-                'form': form.toHTML(bootstrapField)
-            })
-        },
-        'error': async(form)=> {
-
-        },
-        'success': async(form)=> {
-            
-        }
-    })
 })
 
 module.exports = router;

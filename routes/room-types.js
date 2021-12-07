@@ -9,7 +9,7 @@ const { checkIfAuthenticated} = require('../middleware');
 const { Room_type, Amenity } = require('../models');
 
 // display room types
-router.get('/', checkIfAuthenticated, async (req, res) => {
+router.get('/', async (req, res) => {
     //  fetch all room types, i.e. SELECT * FROM room_types table
     let room_types = await Room_type.collection().fetch({
         withRelated: ['amenities']
@@ -20,7 +20,7 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
 });
 
 // create room types
-router.get('/create', checkIfAuthenticated, async (req, res) => {
+router.get('/create', async (req, res) => {
     const allAmenities = await Amenity.fetchAll().map( amenity => [amenity.get('id'), amenity.get('name')]);
     const roomTypeForm = createRoomTypeForm(allAmenities);
     res.render('room-types/create', {
@@ -31,7 +31,7 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     })
 });
 
-router.post('/create', checkIfAuthenticated, async (req, res) => {
+router.post('/create', async (req, res) => {
     const roomTypeForm = createRoomTypeForm();
     roomTypeForm.handle(req, {
         'success': async (form) => {
@@ -61,7 +61,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
 })
 
 // update existing room types
-router.get('/:room_type_id/update', checkIfAuthenticated, async (req, res) => {
+router.get('/:room_type_id/update', async (req, res) => {
     const roomTypeId = req.params.room_type_id;
     const room_type = await Room_type.where({
         'id': roomTypeId
@@ -93,7 +93,7 @@ router.get('/:room_type_id/update', checkIfAuthenticated, async (req, res) => {
     })
 })
 
-router.post('/:room_type_id/update', checkIfAuthenticated, async (req, res) => {
+router.post('/:room_type_id/update', async (req, res) => {
     const room_type = await Room_type.where({
         'id': req.params.room_type_id
     }).fetch({
