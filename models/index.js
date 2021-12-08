@@ -38,4 +38,8 @@ const User = bookshelf.model('User', {
     tableName: 'users'
 });
 
-module.exports = { Room_type, Room, Room_slot, Amenity, User};
+const Customer = bookshelf.model('Customer', {
+    tableName: 'customers'
+});
+
+module.exports = { Room_type, Room, Room_slot, Amenity, User, Customer};
