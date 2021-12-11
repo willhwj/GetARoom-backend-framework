@@ -12,7 +12,7 @@ const dataLayerRoomTypes = require('../dal/room-types');
 const dataLayerRooms = require('../dal/rooms');
 
 // display room slots
-router.get('/', async (req, res) => {
+router.get('/', checkIfAuthenticated, async (req, res) => {
     // let room_slots = await Room_slot.collection().fetch();
     // res.render('room-slots/index', {
     //     'room_slots': room_slots.toJSON()
@@ -102,7 +102,7 @@ router.get('/', async (req, res) => {
 })
 
 // create room slots 
-router.get('/create', async (req, res) => {
+router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allRoomTypes = await dataLayerRoomTypes.getAllRoomTypes();
     const allRooms = await dataLayerRooms.getAllRoomsArray();
     // create an array of 2-item arrays. 2-item array includes room type name and a nested array of room numbers of that room type
@@ -119,7 +119,7 @@ router.get('/create', async (req, res) => {
     })
 })
 
-router.post('/create', async (req, res) => {
+router.post('/create', checkIfAuthenticated, async (req, res) => {
     const allRoomTypes = await dataLayerRoomTypes.getAllRoomTypes();
     const allRooms = await dataLayerRooms.getAllRoomsArray();
     // get an array of 2-item arrays. 2-item array includes room type name and an array of room id & room number
@@ -184,7 +184,7 @@ router.post('/create', async (req, res) => {
 })
 
 // update room slot
-router.get('/:room_slot_id/update', async(req, res)=> {
+router.get('/:room_slot_id/update', checkIfAuthenticated, async(req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await dataLayerSlots.getSlotById(room_slot_id);
 
@@ -203,7 +203,7 @@ router.get('/:room_slot_id/update', async(req, res)=> {
     })
 })
 
-router.post('/:room_slot_id/update', async (req, res)=> {
+router.post('/:room_slot_id/update', checkIfAuthenticated, async (req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await dataLayerSlots.getSlotById(room_slot_id);
     const roomSlotForm = updateRoomSlotForm();
@@ -224,7 +224,7 @@ router.post('/:room_slot_id/update', async (req, res)=> {
 })
 
 // delete slot
-router.get('/:room_slot_id/delete', async(req, res)=> {
+router.get('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await dataLayerSlots.getSlotById(room_slot_id);
     res.render('room-slots/delete', {
@@ -232,7 +232,7 @@ router.get('/:room_slot_id/delete', async(req, res)=> {
     })
 })
 
-router.post('/:room_slot_id/delete', async(req, res)=> {
+router.post('/:room_slot_id/delete', checkIfAuthenticated, async(req, res)=> {
     const room_slot_id = req.params.room_slot_id;
     const room_slot = await dataLayerSlots.getSlotById(room_slot_id);
     await room_slot.destroy();
