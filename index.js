@@ -62,7 +62,7 @@ app.use(csrf());
 // handle CSRF error
 app.use(function (err, req, res, next){
     if(err && err.code =='EBADCSRFTOKEN'){
-        req.flash('error_messages', 'The form has experied. Please try again');
+        req.flash('error_messages', 'The form has expired. Please try again');
         res.redirect('back');
     } else{
         next()
@@ -82,6 +82,9 @@ const roomSlotRoutes = require('./routes/room-slots');
 const amenityRoutes = require('./routes/amenities');
 const userRoutes = require('./routes/users');
 const cloudinaryRoutes = require('./routes/cloudinary');
+const api = {
+    shopping: require('./routes/api/shopping')
+};
 
 async function main(){
 
@@ -92,6 +95,7 @@ async function main(){
     app.use('/amenities', amenityRoutes);
     app.use('/users', userRoutes);
     app.use('/cloudinary', cloudinaryRoutes);
+    app.use('/api/shopping', express.json() ,api.shopping);
 }
 
 main();

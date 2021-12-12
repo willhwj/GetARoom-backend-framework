@@ -376,7 +376,7 @@ const searchForm = (amenities) => {
             'validators': [validators.integer()]
         }),
         'date': fields.date({
-            required: false,
+            required: validators.required(),
             errorAfterField: true,
             cssClasses: {
                 label: ['form-label']
