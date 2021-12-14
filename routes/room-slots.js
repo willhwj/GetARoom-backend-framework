@@ -72,22 +72,11 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
                 q = q.where('timeslot', '<=', endTime)
             }
             if (form.data.amenity) {
-                // SQL statement:
-                // SELECT * FROM room_slots
-                // JOIN
-                // rooms
-                // ON room_slots.room_id = rooms.id
-                // JOIN room_types
-                // on rooms.room_type_id = room_types.id
                 let arrayAmenities = form.data.amenity.map(eachAmenity => {
                     return parseInt(eachAmenity)
                 });
                 console.log(arrayAmenities);
                 q = q.where('id', 'in', arrayAmenities)
-
-                // q = q.query(
-                //     'join', 'room_types', 'room_type', 'room_types.name', 
-                //     )
             }
 
             let room_slots = await q.fetch({
@@ -133,7 +122,9 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
 
     roomSlotForm.handle(req, {
         'success': async (form) => {
+            // form.data.slots is an array of strings, each string is a timeslot format lik 08:00:00
             let slotsPerDay = form.data.slots;
+            // form.data.room_id is an array of room ids.
             let roomsPerSlot = form.data.room_id;
             // recursive function to get an array of dates for this slot creation task
             const addDay = (current, end) => {
@@ -158,6 +149,8 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
                 let date = new Date(eachDate);
                 let dayOfWeek = date.getDay();
                 for (let eachSlot of slotsPerDay) {
+                    
+                    
                     for (let eachRoom of roomsPerSlot) {
                         const room_slot = new Room_slot();
                         room_slot.set('available', form.data.available);

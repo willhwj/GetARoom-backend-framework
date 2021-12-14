@@ -58,7 +58,14 @@ app.use(function(req, res, next){
 })
 
 // enable CSRF
-app.use(csrf());
+// app.use(csrf());
+const csrfInstance= csrf();
+app.use(function(req, res, next){
+    if(req.url.slice(0,5)=='/api/'){
+        return next()
+    }
+    csrfInstance(req, res, next)
+})
 // handle CSRF error
 app.use(function (err, req, res, next){
     if(err && err.code =='EBADCSRFTOKEN'){
@@ -70,7 +77,9 @@ app.use(function (err, req, res, next){
 })
 // share CSRF with hbs files
 app.use(function(req, res, next){
-    res.locals.csrfToken = req.csrfToken();
+    if (req.csrfToken){
+        res.locals.csrfToken = req.csrfToken();
+    }
     next();
 })
 
@@ -83,7 +92,8 @@ const amenityRoutes = require('./routes/amenities');
 const userRoutes = require('./routes/users');
 const cloudinaryRoutes = require('./routes/cloudinary');
 const api = {
-    shopping: require('./routes/api/shopping')
+    shopping: require('./routes/api/shopping'),
+    customer: require('./routes/api/customer')
 };
 
 async function main(){
@@ -96,6 +106,7 @@ async function main(){
     app.use('/users', userRoutes);
     app.use('/cloudinary', cloudinaryRoutes);
     app.use('/api/shopping', express.json() ,api.shopping);
+    app.use('/api/customer', express.json(), api.customer);
 }
 
 main();
