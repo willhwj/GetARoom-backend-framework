@@ -4,7 +4,7 @@ const { bootstrapField, createRoomSlotForm, updateRoomSlotForm, searchForm } = r
 // import in checkIfAuthenticated middleware
 const { checkIfAuthenticated} = require('../middleware');
 // import in the models
-const { Room_slot, Room, Room_type, Amenity } = require('../models');
+const { Room_slot, Room, Room_type, Amenity, Room_type_slot } = require('../models');
 // import in the DAL
 const dataLayerSlots = require('../dal/room-slots');
 const dataLayerAmenities = require('../dal/amenities');
@@ -96,9 +96,10 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allRooms = await dataLayerRooms.getAllRoomsArray();
     // create an array of 2-item arrays. 2-item array includes room type name and a nested array of room numbers of that room type
     const roomListByRoomType = allRoomTypes.map(roomType => {
-        let associatedRooms = allRooms.filter(room => room[0] === roomType[0]);
-        associatedRooms = associatedRooms.map(room => [room[1], room[2]]);
-        return [roomType[1], associatedRooms]
+        // populate associatedRooms when room type id match
+        let associatedRooms = allRooms.filter(room => room[3] === roomType[0]);
+        associatedRooms = associatedRooms.map(room => [room[0], room[2]]);
+        return [roomType[1], associatedRooms];
     });
 
     const roomSlotForm = createRoomSlotForm(roomListByRoomType);
@@ -116,7 +117,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
         // populate associatedRooms when room type id match
         let associatedRooms = allRooms.filter(room => room[3] === roomType[0]);
         associatedRooms = associatedRooms.map(room => [room[0], room[2]]);
-        return [roomType[1], associatedRooms]
+        return [roomType[1], associatedRooms];
     });
     const roomSlotForm = createRoomSlotForm(roomListByRoomType);
 
@@ -149,20 +150,42 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
                 let date = new Date(eachDate);
                 let dayOfWeek = date.getDay();
                 for (let eachSlot of slotsPerDay) {
-                    
-                    
                     for (let eachRoom of roomsPerSlot) {
                         const room_slot = new Room_slot();
+                        const currentSlot = eachDate + ' ' + eachSlot;
                         room_slot.set('available', form.data.available);
                         room_slot.set('day_of_week', dayOfWeek)
                         room_slot.set('date', eachDate);
-                        room_slot.set('timeslot', eachDate + ' ' + eachSlot);
+                        room_slot.set('timeslot', currentSlot);
                         room_slot.set('room_id', eachRoom);
                         let relatedRoomType = allRooms.filter(room => room[0]=== parseInt(eachRoom))[0];
-                        console.log(relatedRoomType);
-                        room_slot.set('room_type', relatedRoomType[4]);
+                        room_slot.set('room_type_name', relatedRoomType[4]);
                         room_slot.set('price', relatedRoomType[1]);
                         await room_slot.save();
+                        // simultaneously also create room_type_slots with respective inventory
+                        // check if the room_type_slot already exists
+                        // if yes, increment inv by 1
+                        // if no, create the room_type_slot and set inv as 1
+                        let room_type_slot = await Room_type_slot.where({
+                            'room_type_id': relatedRoomType[3],
+                            'timeslot': currentSlot
+                        }).fetch({
+                            require: false
+                        });
+                        if (!room_type_slot){
+                            room_type_slot = new Room_type_slot();
+                            room_type_slot.set('room_type_name', relatedRoomType[4]);
+                            room_type_slot.set('timeslot', currentSlot);
+                            room_type_slot.set('price', relatedRoomType[1]);
+                            room_type_slot.set('inventory', 1);
+                            room_type_slot.set('room_type_id', relatedRoomType[3]);
+                            await room_type_slot.save();
+                        } else{
+                            let currentInv = room_type_slot.get('inventory');
+                            currentInv++;
+                            room_type_slot.set('inventory', currentInv);
+                            await room_type_slot.save();
+                        }
                     }
                 }
             }
