@@ -4,24 +4,26 @@ const router = express.Router();
 
 const { Cart_item, Shopping_cart, Room_type_slot } = require('../../models');
 
+// get active cart by customer ID
 router.get('/:customer_id', async(req, res)=> {
     let customerId = req.params.customer_id;
-    res.send (await dataLayerShopping.getActiveCartByCustId(customerId));
-})
-
-
-const getActiveCartByCustId = async (customerId) => {
-    return await Shopping_cart.collection().where({
+    let cart = await Shopping_cart.collection().where({
         'customer_id': customerId,
         'transaction_status': 'active'
     }).fetch({
         require: false,
         withRelated: ['cartItems', 'cartItems.roomTypeSlot']
     })
-}
+    res.send(cart);
+})
 
-async function createCart(customerId, quantity) {
+// create an active cart with customer ID
+router.post('/create', async(req, res)=> {
+    // create cart
+    console.log('enter create cart route');
     let currentTime = new Date();
+    let customerId = req.body.customerId;
+    let quantity = req.body.quantity;
     // cart expires after 1 day, if there is no modification or checkout
     let expiryTime = new Date(currentTime.getMilliseconds() + 86400000);
     let cart = new Shopping_cart({
@@ -35,8 +37,33 @@ async function createCart(customerId, quantity) {
         'quantity_total': quantity
     });
     await cart.save();
-    return cart;
-}
+
+    // create cart item
+    let cartId = cart.get('id');
+    let roomTypeSlotId = req.body.roomTypeSlotId;
+    let roomTypeSlot = await Room_type_slot.where({
+        'id': roomTypeSlotId
+    }).fetch({
+        require: false
+    });
+    let roomTypeName = roomTypeSlot.get('room_type_name');
+    let unitPrice = roomTypeSlot.get('price');
+    let price = unitPrice * quantity;
+    let timeslot = roomTypeSlot.get('timeslot');
+    let cartItem = new Cart_item({
+        'shopping_cart_id': cartId,
+        // 4 statuses: active, inactive, paid, fulfilled
+        'status': 'active',
+        'quantity': quantity,
+        'room_type_name': roomTypeName,
+        'timeslot': timeslot,
+        'price': price,
+        'room_type_slot_id': roomTypeSlotId
+    });
+    await cartItem.save();
+    res.send(cartItem);
+})
+
 
 async function createCartItem(cartId, roomTypeSlotId, quantity) {
     let roomTypeSlot = await Room_type_slot.where({
