@@ -103,7 +103,18 @@ router.get('/:room_id/delete', checkIfAuthenticated, async (req, res) => {
 router.post('/:room_id/delete', checkIfAuthenticated, async (req, res) => {
     const roomId = req.params.room_id;
     const room = await dataLayerRooms.getRoomById(roomId);
+    const roomTypeId = room.get('room_type_id');
     await room.destroy();
+    // reduce inventory of the related room type by 1
+    const roomType = await Room_type.where({
+        'id': roomTypeId
+    }).fetch({
+        require: true
+    });
+    let currentInv = roomType.get('inventory');
+    currentInv --;
+    roomType.set('inventory', currentInv);
+    await roomType.save();
     res.redirect('/rooms');
 })
 

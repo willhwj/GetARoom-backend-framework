@@ -9,6 +9,7 @@ const flash = require('connect-flash');
 const FileStore = require('session-file-store')(session);
 
 const csrf = require('csurf');
+const cors = require("cors");
 
 // create an instance of express app
 let app = express();
@@ -25,6 +26,9 @@ app.use(express.static("public"));
 // set up wax-on
 wax.on(hbs.handlebars);
 wax.setLayoutPath("./views/layouts");
+
+// enable cors
+app.use(cors());
 
 // enable forms
 app.use(express.urlencoded({
@@ -111,6 +115,6 @@ async function main(){
 
 main();
 
-app.listen(3000, () => {
+app.listen(8888, () => {
     console.log("Server has started");
 })
