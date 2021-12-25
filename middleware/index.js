@@ -10,6 +10,7 @@ const checkIfAuthenticated = (req, res, next) => {
 const jwt = require('jsonwebtoken');
 
 const checkIfAuthenticatedJWT = (req, res, next) => {
+    console.log(req.headers);
     const authHeader = req.headers.authorization;
     if (authHeader) {
         const token = authHeader.split(' ')[1];

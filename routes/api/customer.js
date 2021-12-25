@@ -7,25 +7,33 @@ const jwt = require('jsonwebtoken');
 const { checkIfAuthenticatedJWT } = require('../../middleware');
 
 // function to generate jwt token for correct credentials
-const generateAccessToken = (user)=> {
+const generateAccessToken = (customer) => {
     return jwt.sign({
-        'id': user.get('id'),
-        'email': user.get('email')
+        'id': customer.get('id'),
+        'email': customer.get('email'),
+        'firstName': customer.get('firstName'),
+        'lastName': customer.get('lastName')
     }, process.env.TOKEN_SECRET, {
         expiresIn: '1h'
     });
 }
-
-// search customer
-router.get('/search/:customer_email', async (req, res) => {
-    let email = req.params.customer_email;
-    let custAcct = await Customer.where({
-        'email': email
-    }).fetch({
-        require: false
-    });
-    res.send(custAcct)
-});
+// function to check if an email is already registered
+// const checkIfExistingAcct = async (req, res, next) => {
+//     console.log('enter middleware to check email');
+//     let email = req.body.email;
+//     console.log(email);
+//     let custAcct = await Customer.where({
+//         'email': email
+//     }).fetch({
+//         require: false
+//     });
+//     console.log(custAcct.toJSON());
+//     if (custAcct) {
+//         next();
+//     } else {
+//         res.status(404);
+//     }
+// }
 
 // log into customer account
 router.post('/login', async (req, res) => {
@@ -36,35 +44,47 @@ router.post('/login', async (req, res) => {
     }).fetch({
         require: false
     });
-    console.log(custAcct.toJSON());
-    if (custAcct && custAcct.get('password')===pw){
+    if (custAcct && custAcct.get('password') === pw) {
         let accessToken = generateAccessToken(custAcct);
         res.send(accessToken);
-    } else{
-        res.status(404).json({error: 'the credentials do not match our record.'})
+    } else {
+        res.status(404).send('the credentials do not match our record.')
     }
-    
+
 });
 
 // display profile page
 router.get('/profile', checkIfAuthenticatedJWT, async (req, res) => {
     const cust = req.user;
-    res.send(user);
+    console.log(cust);
+    res.send(cust);
 })
 
 // create a new customer account
 router.post('/create', async (req, res) => {
-    const newAcct = new Customer({
-        'firstName': req.body.fName,
-        'lastName': req.body.lName,
-        'email': req.body.email,
-        'password': req.body.password,
-        'phone_number': req.body.phone,
-        'status': 'active'
+    let email = req.body.email;
+    console.log(email);
+    let custAcct = await Customer.where({
+        'email': email
+    }).fetch({
+        require: false
     });
-    await newAcct.save();
-    console.log('new customer account is created successfully');
-    res.send(newAcct);
+    if (custAcct) {
+        res.status(404).send('the email is already registered');
+    } else {
+        const newAcct = new Customer({
+            'firstName': req.body.firstName,
+            'lastName': req.body.lastName,
+            'email': req.body.email,
+            'password': req.body.password,
+            'phone_number': req.body.phone,
+            'status': 'active'
+        });
+        await newAcct.save();
+        console.log('new customer account is created successfully');
+        let accessToken = generateAccessToken(newAcct);
+        res.send(accessToken);
+    }
 });
 
 const logIntoAcct = async (email, password) => {
