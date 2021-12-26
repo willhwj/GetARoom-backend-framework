@@ -17,23 +17,6 @@ const generateAccessToken = (customer) => {
         expiresIn: '1h'
     });
 }
-// function to check if an email is already registered
-// const checkIfExistingAcct = async (req, res, next) => {
-//     console.log('enter middleware to check email');
-//     let email = req.body.email;
-//     console.log(email);
-//     let custAcct = await Customer.where({
-//         'email': email
-//     }).fetch({
-//         require: false
-//     });
-//     console.log(custAcct.toJSON());
-//     if (custAcct) {
-//         next();
-//     } else {
-//         res.status(404);
-//     }
-// }
 
 // log into customer account
 router.post('/login', async (req, res) => {
@@ -64,6 +47,7 @@ router.get('/profile', checkIfAuthenticatedJWT, async (req, res) => {
 router.post('/create', async (req, res) => {
     let email = req.body.email;
     console.log(email);
+    // check if the email is already registered
     let custAcct = await Customer.where({
         'email': email
     }).fetch({
@@ -71,7 +55,9 @@ router.post('/create', async (req, res) => {
     });
     if (custAcct) {
         res.status(404).send('the email is already registered');
-    } else {
+    } 
+    // if not in use, create a new account
+    else {
         const newAcct = new Customer({
             'firstName': req.body.firstName,
             'lastName': req.body.lastName,
@@ -86,19 +72,5 @@ router.post('/create', async (req, res) => {
         res.send(accessToken);
     }
 });
-
-const logIntoAcct = async (email, password) => {
-
-
-}
-
-const searchAcct = async (email) => {
-    const custAcct = await Customer.where({
-        'email': email
-    }).fetch({
-        require: false
-    });
-    return custAcct;
-}
 
 module.exports = router;

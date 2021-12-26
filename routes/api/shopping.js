@@ -4,6 +4,36 @@ const router = express.Router();
 
 const { Cart_item, Shopping_cart, Room_type_slot } = require('../../models');
 
+// get available room type slots
+router.get('/', async(req, res)=> {
+    let roomTypeSlots = await Room_type_slot.collection().fetch();
+    // add search criteria per user input
+    if (req.body.roomTypeName) {
+        roomTypeSlots = roomTypeSlots.where('room_type_name', 'like','%' + req.body.roomTypeName + '%');
+    }
+    if (req.body.date) {
+        let date = new Date(req.body.date);
+        let nextDate = new Date(date.setDate(date.getDate() + 1));
+        roomTypeSlots = roomTypeSlots.where('timeslot', '>=', new Date(req.body.date)).where('timeslot', '<=', nextDate);
+    }
+    if (req.body.startSlot){
+        let startSlot = req.body.date + ' ' + req.body.startSlot;
+        let startTime = new Date(startSlot);
+        roomTypeSlots = roomTypeSlots.where('timeslot', '>=', startTime);
+    }
+    if (req.body.endSlot){
+        let endSlot = req.body.date + ' ' + req.body.endSlot;
+        let endTime = new Date(endSlot);
+        roomTypeSlots = roomTypeSlots.where('timeslot', '<=', endTime);
+    }
+    if (req.body.inventory) {
+        roomTypeSlots = roomTypeSlots.where('inventory', '>=', req.body.inventory);
+    }
+    let filtered = await roomTypeSlots.fetch();
+    console.log(filtered.toJSON());
+    res.send(filtered);
+})
+
 // get active cart by customer ID
 router.get('/:customer_id', async(req, res)=> {
     let customerId = req.params.customer_id;
@@ -17,7 +47,7 @@ router.get('/:customer_id', async(req, res)=> {
     res.send(cart);
 })
 
-// create an active cart with customer ID
+// create an active cart with customer ID with 1st cart item
 router.post('/create', async(req, res)=> {
     // create cart
     console.log('enter create cart route');
@@ -64,44 +94,26 @@ router.post('/create', async(req, res)=> {
     res.send(cartItem);
 })
 
+// update cart items to existing cart
+router.post('/update', async( req, res)=> {
+// scenario 1: same cart item, only update the quantity
 
-async function createCartItem(cartId, roomTypeSlotId, quantity) {
-    let roomTypeSlot = await Room_type_slot.where({
-        'id': roomTypeSlotId
-    }).fetch({
-        require: false
-    });
-    let roomTypeName = roomTypeSlot.get('room_type_name');
-    let unitPrice = roomTypeSlot.get('price');
-    let price = unitPrice * quantity;
-    let timeslot = roomTypeSlot.get('timeslot');
-    let cartItem = new Cart_item({
-        'shopping_cart_id': cartId,
-        // 4 statuses: active, inactive, paid, fulfilled
-        'status': 'active',
-        'quantity': quantity,
-        'room_type_name': roomTypeName,
-        'timeslot': timeslot,
-        'price': price
-    });
-    await cartItem.save();
-    return cartItem;
-}
+// scenario 2: a new item is added
 
-async function addToCart(customerId, roomTypeSlotId, quantity) {
-    let cart = await getActiveCartByCustId(customerId);
-    // if there is no cart/ cart is empty, create cart and add 1st item to cart
-    // if (!cart) {
-    //     cart = await createCart(customerId, quantity);
-    //     let cartId = cart.get('id');
-    //     return await createCartItem(cartId, roomTypeSlotId, quantity);
-    // } else if(cart.related('cartItems.roomTypeSlot'))
+// scenario 3: an existing item is removed
 
-    // if there is a cart with item and the same item is added, update the quantity of the cart item
+// scenario 4: all items are removed. cart abandoned
 
+})
 
-    // if there is a cart with item and different item is added, add item to the cart
+// convert a shopping cart to an order
+router.post('/order', async(req, res)=> {
+    // get the cart ID and stripe success msg, create order
+})
 
-}
+// get orders by customer ID and status
+router.get('/order/:customerId', async(req, res)=> {
+
+})
 
 module.exports = router;
