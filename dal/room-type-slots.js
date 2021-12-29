@@ -4,7 +4,7 @@ const getRoomTypeSlotById = async( roomTypeSlotId) => {
     return await Room_type_slot.where({
         'id': roomTypeSlotId
     }).fetch({
-        require: true
+        require: false
     })
 }
 

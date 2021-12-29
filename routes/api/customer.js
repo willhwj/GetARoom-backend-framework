@@ -5,6 +5,7 @@ const { Customer } = require('../../models');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { checkIfAuthenticatedJWT } = require('../../middleware');
+const dataLayerOrders = require('../../dal/orders');
 
 // function to generate jwt token for correct credentials
 const generateAccessToken = (customer) => {
@@ -73,5 +74,14 @@ router.post('/create', async (req, res) => {
         res.send(accessToken);
     }
 });
+
+// get order list by customer ID
+router.get('/orders/:custId', async(req, res)=> {
+    let custId = req.params.custId;
+    let orderArray = await dataLayerOrders.getOrdersByCustId(custId);
+    orderArray = orderArray.toJSON();
+    console.log(orderArray, orderArray[1].cartItems[0]);
+    res.send(orderArray);
+})
 
 module.exports = router;
