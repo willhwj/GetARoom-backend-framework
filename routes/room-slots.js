@@ -42,7 +42,6 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
             })
         },
         'success': async(form)=> {
-            console.log(form.data);
             if (form.data.room_type_name) {
                 // q = q.where('room_type', 'like', '%' + req.query.room_type_name + '%')
                 q = q.where('room_type', 'like', '%' + form.data.room_type_name + '%')
@@ -59,23 +58,18 @@ router.get('/', checkIfAuthenticated, async (req, res) => {
             }
             if (form.data.starting_time) {
                 let startSlot = form.data.date + ' ' + form.data.starting_time;
-                console.log('startSlot: ', startSlot);
                 let startTime = new Date(startSlot);
-                console.log('startTime: ', startTime);
                 q = q.where('timeslot', '>=', startTime)
             }
             if (form.data.ending_time) {
                 let endSlot = form.data.date + ' ' + form.data.ending_time;
-                console.log('endSlot: ', endSlot);
                 let endTime = new Date(endSlot); 
-                console.log('endTime: ', endTime);
                 q = q.where('timeslot', '<=', endTime)
             }
             if (form.data.amenity) {
                 let arrayAmenities = form.data.amenity.map(eachAmenity => {
                     return parseInt(eachAmenity)
                 });
-                console.log(arrayAmenities);
                 q = q.where('id', 'in', arrayAmenities)
             }
 

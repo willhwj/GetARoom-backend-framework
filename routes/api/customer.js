@@ -12,7 +12,9 @@ const generateAccessToken = (customer) => {
         'id': customer.get('id'),
         'email': customer.get('email'),
         'firstName': customer.get('firstName'),
-        'lastName': customer.get('lastName')
+        'lastName': customer.get('lastName'),
+        'phone': customer.get('phone_number'),
+        'status': customer.get('status')
     }, process.env.TOKEN_SECRET, {
         expiresIn: '1h'
     });
@@ -39,7 +41,6 @@ router.post('/login', async (req, res) => {
 // display profile page
 router.get('/profile', checkIfAuthenticatedJWT, async (req, res) => {
     const cust = req.user;
-    console.log(cust);
     res.send(cust);
 })
 

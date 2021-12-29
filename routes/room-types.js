@@ -109,7 +109,6 @@ router.post('/:room_type_id/update', async (req, res) => {
             room_type.save();
             let existingAmenityIds = await room_type.related('amenities').pluck('id');
             let toRemove = existingAmenityIds.filter( id => amenities.includes(id) === false);
-            console.log(toRemove, amenities);
             await room_type.amenities().detach(toRemove);
             await room_type.amenities().attach(amenities);
             res.redirect('/room-types');

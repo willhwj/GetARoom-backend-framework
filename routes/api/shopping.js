@@ -5,11 +5,11 @@ const router = express.Router();
 const { Cart_item, Shopping_cart, Room_type_slot } = require('../../models');
 
 // get available room type slots
-router.get('/', async(req, res)=> {
+router.post('/', async(req, res)=> {
     let roomTypeSlots = await Room_type_slot.collection().fetch();
     // add search criteria per user input
-    if (req.body.roomTypeName) {
-        roomTypeSlots = roomTypeSlots.where('room_type_name', 'like','%' + req.body.roomTypeName + '%');
+    if (req.body.roomTypeId && req.body.roomTypeId!=='') {
+        roomTypeSlots = roomTypeSlots.where({'room_type_id': req.body.roomTypeId});
     }
     if (req.body.date) {
         let date = new Date(req.body.date);
@@ -26,11 +26,10 @@ router.get('/', async(req, res)=> {
         let endTime = new Date(endSlot);
         roomTypeSlots = roomTypeSlots.where('timeslot', '<=', endTime);
     }
-    if (req.body.inventory) {
+    if (req.body.numRooms) {
         roomTypeSlots = roomTypeSlots.where('inventory', '>=', req.body.inventory);
     }
     let filtered = await roomTypeSlots.fetch();
-    console.log(filtered.toJSON());
     res.send(filtered);
 })
 
@@ -95,20 +94,15 @@ router.post('/create', async(req, res)=> {
 })
 
 // update cart items to existing cart
-router.post('/update', async( req, res)=> {
-// scenario 1: same cart item, only update the quantity
+router.post('/update', async (req, res) => {
+    // scenario 1: same cart item, only update the quantity
 
-// scenario 2: a new item is added
+    // scenario 2: a new item is added
 
-// scenario 3: an existing item is removed
+    // scenario 3: an existing item is removed
 
-// scenario 4: all items are removed. cart abandoned
+    // scenario 4: all items are removed. cart abandoned
 
-})
-
-// convert a shopping cart to an order
-router.post('/order', async(req, res)=> {
-    // get the cart ID and stripe success msg, create order
 })
 
 // get orders by customer ID and status

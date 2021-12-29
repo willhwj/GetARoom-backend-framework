@@ -46,9 +46,6 @@ router.post('/register', (req, res) => {
 // login page
 router.get('/login', (req, res) => {
     const login = loginForm();
-    console.log('#######');
-    console.log(req.session);
-    console.log('#######');
     res.render('users/login', {
         'form': login.toHTML(bootstrapField)
     })
@@ -63,18 +60,11 @@ router.post('/login', (req, res) => {
             }).fetch({
                 require: false
             });
-            console.log(user.toJSON());
-            console.log(user);
             if (!user) {
-                console.log('success, but no user');
                 req.flash('error_messages', 'Sorry, the authentication details you provided does not work.');
                 req.redirect('/users/login');
             } else {
                 if (user.get('password') === getHashedPassword(form.data.password)) {
-                    console.log('success');
-                    console.log('$$$$$$$');
-                    console.log(req.session);
-                    console.log('$$$$$$$');
                     req.session.user = {
                         id: user.get('id'),
                         username: user.get('username'),
@@ -87,14 +77,12 @@ router.post('/login', (req, res) => {
                       })
                     
                 } else {
-                    console.log('success, but password not matched');
                     req.flash('error_messages', 'Sorry, the authentication details you provides does not work.');
                     res.redirect('/users/login')
                 }
             }
         },
         'error': (form) => {
-            console.log('error');
             req.flash('error_messages', 'There are some problems logging you in. Please fill in the form again');
             res.render('users/login', {
                 'form': form.toHTML(bootstrapField)
@@ -106,9 +94,6 @@ router.post('/login', (req, res) => {
 // profile page for logged in user
 router.get('/profile', (req, res) => {
     const user = req.session.user;
-    console.log('------');
-    console.log(req.session);
-    console.log('------');
     if (!user) {
         req.flash('error_messages', 'You do not have permission to view this page');
         res.redirect('/users/login');
