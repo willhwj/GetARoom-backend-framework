@@ -30,6 +30,7 @@ router.post('/', async(req, res)=> {
         roomTypeSlots = roomTypeSlots.where('inventory', '>=', req.body.inventory);
     }
     let filtered = await roomTypeSlots.fetch();
+    console.log(filtered);
     res.send(filtered);
 })
 
