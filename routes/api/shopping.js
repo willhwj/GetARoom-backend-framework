@@ -108,7 +108,7 @@ router.post('/update', async (req, res) => {
 
 // get orders by customer ID and status
 router.get('/order/:customerId', async(req, res)=> {
-
+    
 })
 
 module.exports = router;

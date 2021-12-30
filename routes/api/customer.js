@@ -80,7 +80,6 @@ router.get('/orders/:custId', async(req, res)=> {
     let custId = req.params.custId;
     let orderArray = await dataLayerOrders.getOrdersByCustId(custId);
     orderArray = orderArray.toJSON();
-    console.log(orderArray, orderArray[1].cartItems[0]);
     res.send(orderArray);
 })
 
